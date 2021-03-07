@@ -15,9 +15,6 @@ int main(){
         if (event.type == sf::Event::Closed)
             window.close();
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-      if(sf::Mouse::getPosition(window) > sf::Vector2i(XOFF,YOFF))
-        printf("Dentro!");
     window.clear(backgroundColor);
     board.draw();
     window.display();
