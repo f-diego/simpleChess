@@ -1,4 +1,4 @@
-CC=g++
+CC=g++ -g
 CC2=x86_64-w64-mingw32-g++
 CFLAGS=-Wall
 
@@ -9,10 +9,10 @@ LIBd=-DSFML_STATIC -lsfml-graphics-s-d -lsfml-window-s-d -lsfml-system-s-d -lfre
 LIB=-lsfml-graphics -lsfml-window -lsfml-system
 
 
-all: game
-
-game: main.cpp
+game.exe: main.cpp Board.cpp Board.h
 	$(CC) $(CFLAGS) main.cpp Board.cpp $(SFMLFILES) $(LIBd) -o game.exe
 
-run: game game.exe
+run: game.exe
 	game.exe
+
+all: game.exe
