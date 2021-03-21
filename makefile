@@ -9,7 +9,7 @@ LIBd=-DSFML_STATIC -lsfml-graphics-s-d -lsfml-window-s-d -lsfml-system-s-d -lfre
 LIB=-lsfml-graphics -lsfml-window -lsfml-system
 
 
-game.exe: main.cpp Board.cpp Board.h
+game.exe: main.cpp Board.cpp Board.h Render.hpp
 	$(CC) $(CFLAGS) main.cpp Board.cpp $(SFMLFILES) $(LIBd) -o game.exe
 
 run: game.exe
