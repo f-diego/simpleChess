@@ -1,3 +1,5 @@
-*.exe
 .vscode/*
 res/*
+build/*
+*.o
+*.exe

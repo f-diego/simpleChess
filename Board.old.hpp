@@ -1,9 +1,5 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 #include <iostream>
-
-#define XOFF 75
-#define YOFF 75
 
 class Board {
 public:
@@ -28,15 +24,20 @@ public:
   uint8_t indexPos(std::string);
   uint8_t move(std::string);
   void readFen(std::string FEN);
-  void draw();
+  int16_t getScore() {
+    return score;
+  }
+  void setScore(int16_t refscore) {
+    score = refscore;
+  }
 
 private:
   int8_t boardPosition[8][8] = {0};
-  sf::RenderWindow *window;
-  sf::Texture texWh, texBk;
+  int16_t score;
+  //sf::Texture texWh, texBk;
   std::string moveHistory;
-  sf::Font font;
-  sf::Color color1 = sf::Color(164, 171, 189);
-  sf::Color color2 = sf::Color(52, 95, 117);
-  sf::Color colorh = sf::Color(255, 255, 255, 150);
+  //sf::Font font;
+  //sf::Color color1 = sf::Color(164, 171, 189);
+  //sf::Color color2 = sf::Color(52, 95, 117);
+  //sf::Color colorh = sf::Color(255, 255, 255, 150);
 };

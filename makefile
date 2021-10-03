@@ -1,18 +1,14 @@
 CC=g++ -g
-CC2=x86_64-w64-mingw32-g++
 CFLAGS=-Wall
 
-SFMLPATH=X:/dev/SFML-2.5.1
-SFMLFILES=-I "$(SFMLPATH)/include" -L "$(SFMLPATH)/lib/"
-LIBd2=-lwinmm -lgdi32 -lopengl32 -lfreetype -lsfml-system-s-d -lsfml-window-s-d -lsfml-graphics-s-d
-LIBd=-DSFML_STATIC -lsfml-graphics-s-d -lsfml-window-s-d -lsfml-system-s-d -lfreetype -lopengl32 -lgdi32 -lwinmm
-LIB=-lsfml-graphics -lsfml-window -lsfml-system
 
+INC=-ID:/msys64/mingw64/include/SDL2 -Dmain=SDL_main
+LIB=-LD:/msys64/mingw64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
 
-game.exe: main.cpp Board.cpp Board.h Render.hpp
-	$(CC) $(CFLAGS) main.cpp Board.cpp $(SFMLFILES) $(LIBd) -o game.exe
+all: ./build/sdl.exe
 
-run: game.exe
-	game.exe
-
-all: game.exe
+./build/sdl.exe: main.cpp sdl_app.cpp Board.cpp
+	$(CC) -o "build/sdl.exe" main.cpp sdl_app.cpp Board.cpp $(INC) $(LIB)
+	
+run: ./build/sdl.exe
+	./build/sdl.exe

@@ -1,46 +1,43 @@
-#include "Board.h"
-#include "Render.hpp"
-#include "fish.hpp"
-#include <SFML/Graphics.hpp>
-#include <string>
+#include "Board.hpp"
+#include "sdl_app.hpp"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
-#define XOFF 75
-#define YOFF 75
+int main(int argv, char **args) {
+  if (SDL_Init(SDL_INIT_VIDEO) > 0)
+    printf("HEY.. SDL_Init HAS FAILED. SDL_ERROR: %s\n", SDL_GetError());
+  if (!(IMG_Init(IMG_INIT_PNG)))
+    printf("IMG_init has failed. Error:  %s\n", SDL_GetError());
 
-int main() {
-  sf::RenderWindow window(sf::VideoMode(750, 750), "Xadrez do Jotinha", sf::Style::Titlebar | sf::Style::Close);
-  sf::Color backgroundColor(22, 23, 35);
-  startFish("sf.exe");
-  Board board;
-  Render scrboard(window, board);
-  board.move("e2e4");
-  board.move("f7f5");
-  //board.move("e4f5");
-  board.printHistory();
-  while (window.isOpen()) {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed) {
-        window.close();
+  App app("SDL-Chess", 1280, 720);
+  ChessGame *chessgame = new ChessGame();
+  app.setChessGame(chessgame);
+  bool game = true;
+  SDL_Event event;
+
+  while (game) {
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT)
+        game = false;
+      if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
+        case SDLK_EQUALS:
+          app.aumentar();
+          break;
+        case SDLK_MINUS:
+          app.diminuir();
+          break;
+        default:
+          break;
+        }
       }
-      //if (event.type == sf::Event::MouseButtonPressed && board.mouseInsideBoard())
-      //  board.mouseGrab();
-      //if (event.type == sf::Event::MouseButtonReleased) {
-      //  board.mouseRelease();
-      //}
-      //if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Left){
-      //  std::string minhajogada = fishMove(board.getHistory());
-      //  board.move(minhajogada);
-      //  board.printHistory();
     }
 
-    window.clear(backgroundColor);
-    scrboard.draw();
-    //board.draw();
-    scrboard.getCursorSquare();
-    //board.highlightCursor();
-    window.display();
-    //teste
+    app.limpar();
+    app.drawBoard();
+    app.display();
   }
+  app.finalizar();
+  SDL_Quit();
   return 0;
 }
