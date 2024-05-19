@@ -1,11 +1,17 @@
 #pragma once
 
 enum Pecas {
-    VAZIO,
-    REI,
-    DAMA,
-    TORRE,
-    BISPO,
-    CAVALO,
-    PEAO,
+    pREI = -6,
+    pDAMA,
+    pTORRE,
+    pBISPO,
+    pCAVALO,
+    pPEAO,
+    VAZIO = 0,
+    bPEAO,
+    bCAVALO,
+    bBISPO,
+    bTORRE,
+    bDAMA,
+    bREI
 };

@@ -1,5 +1,6 @@
 #include "Renderizador.hpp"
 #include "Pecas.h"
+#include <SDL_mouse.h>
 
 Renderizador::Renderizador(const char* title, void* partida, int largura, int altura)
 {
@@ -15,17 +16,19 @@ Renderizador::Renderizador(const char* title, void* partida, int largura, int al
     this->color1 = { 52, 95, 117, 255 };
     this->color2 = { 164, 171, 189, 255 };
     this->colorh = { 0, 255, 0, 100 };
+
+    this->pecaDragNDrop = bREI;
 }
 
 Renderizador::~Renderizador()
 {
-    this->destroiTela();
+    SDL_DestroyWindow(window);
 }
 
 SDL_Texture* Renderizador::carregarTextura(const char* path)
 {
     SDL_Texture* texture = nullptr;
-    texture = IMG_LoadTexture(renderer, path);
+    texture = IMG_LoadTexture(this->renderer, path);
     if (!texture)
         printf("Failed to load texture, error: %s\n", SDL_GetError());
     return texture;
@@ -33,42 +36,57 @@ SDL_Texture* Renderizador::carregarTextura(const char* path)
 
 void Renderizador::RenderizaFrame()
 {
-    limpaTela();
+    SDL_RenderClear(this->renderer);
     desenhaTabuleiro();
-    desenhaPecas();
-    atualizaTela();
-}
-
-void Renderizador::destroiTela()
-{
-    SDL_DestroyWindow(window);
-}
-
-void Renderizador::limpaTela()
-{
-    SDL_RenderClear(renderer);
+    desenhaTodasPecas();
+    SDL_RenderPresent(this->renderer);
 }
 
 void Renderizador::renderizaSprite(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dst)
 {
-    SDL_RenderCopy(renderer, texture, src, dst);
+    SDL_RenderCopy(this->renderer, texture, src, dst);
 }
 
-void Renderizador::desenhaPeca(int8_t piece, int x, int y)
+void Renderizador::desenhaPeca(Pecas piece, int x, int y, bool tabuleiro)
 {
-    SDL_Texture* sprPiece;
+    if (piece == VAZIO) 
+        return;
 
-    if (piece < 0) {
-        sprPiece = negras;
-        piece *= -1;
+    SDL_Rect destino;
+    SDL_Texture* sprPiece = (piece < 0) ? negras : brancas;
+
+    SDL_Rect recorteSprite = { 75 * (piece - 1), 0, 75, 75 };
+
+    if (tabuleiro) {
+        destino = { this->scale * x, this->scale * y, this->scale, this->scale };
     }
     else {
-        sprPiece = brancas;
+        destino = { x - this->scale / 2, y - this->scale / 2, this->scale, this->scale };
     }
+    
+    renderizaSprite(sprPiece, &recorteSprite, &destino);
+}
 
-    SDL_Rect recorte = { 75 * (piece - 1), 0, 75, 75 };
-    SDL_Rect destino = { scale + scale * x, scale + scale * y, scale, scale };
-    renderizaSprite(sprPiece, &recorte, &destino);
+void Renderizador::desenhaTodasPecas()
+{
+    desenhaPeca(Pecas::bREI, 0, 1);
+    desenhaPecaDragMouse();
+    return;
+    for (uint8_t i = 0; i < 8; i++)
+        desenhaPeca((Pecas)i, i, i);
+    for (uint8_t i = 0; i < 8; i++)
+        desenhaPeca((Pecas)i, 8 - i, i);
+}
+
+void Renderizador::desenhaPecaDragMouse()
+{
+    int x, y;
+
+    if (this->pecaDragNDrop == VAZIO)
+        return;
+
+    SDL_GetMouseState(&x, &y);
+    desenhaPeca(pecaDragNDrop, x, y, false);
 }
 
 void Renderizador::renderizaRetangulo(SDL_Rect* rect, SDL_Color* c)
@@ -81,17 +99,6 @@ void Renderizador::renderizaRetangulo(SDL_Rect* rect, SDL_Color* c)
     //SDL_FillRect(dst, r, (Uint32)((c->r << 16) + (c->g << 8) + (c->b << 0));
 }
 
-void Renderizador::desenhaPecas()
-{
-    desenhaPeca(Pecas::REI, 0, 0);
-    return;
-    for (uint8_t i = 0; i < 8; i++)
-        desenhaPeca(i, i, i);
-    for (uint8_t i = 0; i < 8; i++)
-        desenhaPeca(i, 8 - i, i);
-}
-
-
 void Renderizador::desenhaTabuleiro()
 {
     SDL_Rect quadrado = { 0, 0, scale, scale };
@@ -99,13 +106,8 @@ void Renderizador::desenhaTabuleiro()
         for (uint8_t i = 0; i < 8; i++) {
             quadrado.x = scale * i;
             quadrado.y = scale * j;
-            //alternate colors
+            //alterna cores
             renderizaRetangulo(&quadrado, ((i + j) % 2 == 0) ? &color1 : &color2);
         }
     }
-}
-
-void Renderizador::atualizaTela()
-{
-    SDL_RenderPresent(renderer);
 }
