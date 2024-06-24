@@ -1,24 +1,26 @@
 #pragma once
-#include <SDL.h>
-#include "Board.hpp"
-#include "Renderizador.hpp"
+#include "Peca.h"
 #include <string>
-#include <vector>
+#include <SDL_rect.h>
 
-class Partida
-{
-private:
-    std::vector<Board> board;
-    Board* currentBoard;
-    int8_t currentMove[4];
+static const std::string fenPosicaoInicial = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-public:
-    Partida();
-    ~Partida();
+typedef struct Posicao {
+    Peca Pecas[64];
+} Posicao;
 
-    int8_t readPiece(uint8_t x, uint8_t y) const
-    {
-        return currentBoard->get(x, y);
-    }
-    int8_t indexPos(std::string);
-};
+typedef struct EstadoTabuleiro {
+    Posicao* posicao = nullptr;
+    Posicao* posicaoFixa = nullptr;
+    Posicao* posicaoTemp = nullptr;
+
+    Peca pecaDragNDrop = VAZIO;
+    SDL_Point dragNDrop;
+    
+    bool brancasJogam = true;
+} EstadoTabuleiro;
+
+
+
+Posicao* setPosicao(EstadoTabuleiro* partida, std::string fen);
+Posicao* setPosicaoInicial(EstadoTabuleiro* partida);

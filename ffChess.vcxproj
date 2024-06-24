@@ -133,16 +133,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Board.cpp" />
+    <ClCompile Include="src\Entrada.cpp" />
     <ClCompile Include="src\Partida.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Renderizador.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Board.hpp" />
+    <ClInclude Include="src\Entrada.h" />
     <ClInclude Include="src\Partida.h" />
-    <ClInclude Include="src\Pecas.h" />
-    <ClInclude Include="src\Renderizador.hpp" />
+    <ClInclude Include="src\Peca.h" />
+    <ClInclude Include="src\Renderizador.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\res\default.png">

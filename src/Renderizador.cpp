@@ -1,113 +1,114 @@
-#include "Renderizador.hpp"
-#include "Pecas.h"
-#include <SDL_mouse.h>
+#include "Renderizador.h"
 
-Renderizador::Renderizador(const char* title, void* partida, int largura, int altura)
+SDL_Texture* carregarTextura(SDL_Renderer* renderer, const char* path);
+void desenhaRetangulo(Renderizador* renderizador, SDL_Rect* rec, SDL_Color* color);
+void desenhaPeca(Renderizador* renderizador, Peca peca, int x, int y, bool tabuleiro = true);
+void desenhaPecaDragMouse(Renderizador*);
+void desenhaPecasTabuleiro(Renderizador* renderizador);
+void desenhaTabuleiro(Renderizador* renderizador);
+
+void inicializaRender(Renderizador* renderizador, const char* title, EstadoTabuleiro* partida, int largura, int altura)
 {
     int wflags = SDL_WINDOW_SHOWN;
-    window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, largura, altura, wflags);
-    if (!window)
+    renderizador->window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, largura, altura, wflags);
+    if (!renderizador->window)
         printf("Falha ao criar janela, erro: %s\n", SDL_GetError());
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
+    renderizador->sdlRenderer = SDL_CreateRenderer(renderizador->window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
 
-    this->brancas = carregarTextura("defwh.png");
-    this->negras = carregarTextura("defwh.png");
+    renderizador->brancas = carregarTextura(renderizador->sdlRenderer, "defwh.png");
+    renderizador->negras = carregarTextura(renderizador->sdlRenderer, "defbka.png");
+    renderizador->color1 = { 52, 95, 117, 255 };
+    renderizador->color2 = { 164, 171, 189, 255 };
+    renderizador->colorh = { 0, 255, 0, 100 };
 
-    this->color1 = { 52, 95, 117, 255 };
-    this->color2 = { 164, 171, 189, 255 };
-    this->colorh = { 0, 255, 0, 100 };
-
-    this->pecaDragNDrop = bREI;
+    renderizador->partida = partida;
 }
 
-Renderizador::~Renderizador()
-{
-    SDL_DestroyWindow(window);
+void encerra(Renderizador* renderizador) {
+    SDL_DestroyWindow(renderizador->window);
 }
 
-SDL_Texture* Renderizador::carregarTextura(const char* path)
+SDL_Texture* carregarTextura(SDL_Renderer* renderer, const char* path)
 {
     SDL_Texture* texture = nullptr;
-    texture = IMG_LoadTexture(this->renderer, path);
+    texture = IMG_LoadTexture(renderer, path);
     if (!texture)
         printf("Failed to load texture, error: %s\n", SDL_GetError());
     return texture;
 }
 
-void Renderizador::RenderizaFrame()
+void RenderizaFrame(Renderizador* renderizador)
 {
-    SDL_RenderClear(this->renderer);
-    desenhaTabuleiro();
-    desenhaTodasPecas();
-    SDL_RenderPresent(this->renderer);
+    SDL_RenderClear(renderizador->sdlRenderer);
+    desenhaTabuleiro(renderizador);
+    desenhaPecasTabuleiro(renderizador);
+    desenhaPecaDragMouse(renderizador);
+    SDL_RenderPresent(renderizador->sdlRenderer);
 }
 
-void Renderizador::renderizaSprite(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dst)
+void desenhaPeca(Renderizador* renderizador, Peca peca, int x, int y, bool tabuleiro)
 {
-    SDL_RenderCopy(this->renderer, texture, src, dst);
-}
-
-void Renderizador::desenhaPeca(Pecas piece, int x, int y, bool tabuleiro)
-{
-    if (piece == VAZIO) 
+    if (peca == VAZIO) 
         return;
 
+    int scale = renderizador->scale;
+    bool negras = (peca < 0);
     SDL_Rect destino;
-    SDL_Texture* sprPiece = (piece < 0) ? negras : brancas;
+    SDL_Texture* pieceTexture = negras ? renderizador->negras : renderizador->brancas;
 
-    SDL_Rect recorteSprite = { 75 * (piece - 1), 0, 75, 75 };
+    int xRecorteSprite = (int)peca * ((negras ? -1 : 1));
+
+    SDL_Rect recorteSprite = { 75 * (xRecorteSprite - 1), 0, 75, 75 };
 
     if (tabuleiro) {
-        destino = { this->scale * x, this->scale * y, this->scale, this->scale };
+        destino = { scale * x, scale * y, scale, scale };
     }
     else {
-        destino = { x - this->scale / 2, y - this->scale / 2, this->scale, this->scale };
+        destino = { x - scale / 2, y - scale / 2, scale, scale };
     }
-    
-    renderizaSprite(sprPiece, &recorteSprite, &destino);
+
+    SDL_RenderCopy(renderizador->sdlRenderer, pieceTexture, &recorteSprite, &destino);
 }
 
-void Renderizador::desenhaTodasPecas()
+void desenhaPecasTabuleiro(Renderizador* renderizador)
 {
-    desenhaPeca(Pecas::bREI, 0, 1);
-    desenhaPecaDragMouse();
-    return;
-    for (uint8_t i = 0; i < 8; i++)
-        desenhaPeca((Pecas)i, i, i);
-    for (uint8_t i = 0; i < 8; i++)
-        desenhaPeca((Pecas)i, 8 - i, i);
+    for (int i = 0; i < 64; i++)
+    {
+        desenhaPeca(renderizador, renderizador->partida->posicao->Pecas[i], i % 8, i / 8);
+    }
 }
 
-void Renderizador::desenhaPecaDragMouse()
+void desenhaPecaDragMouse(Renderizador* renderizador)
 {
-    int x, y;
+    EstadoTabuleiro* estado = renderizador->partida;
 
-    if (this->pecaDragNDrop == VAZIO)
-        return;
-
-    SDL_GetMouseState(&x, &y);
-    desenhaPeca(pecaDragNDrop, x, y, false);
+    desenhaPeca(renderizador, estado->pecaDragNDrop, estado->dragNDrop.x, estado->dragNDrop.y, false);
 }
 
-void Renderizador::renderizaRetangulo(SDL_Rect* rect, SDL_Color* c)
+void desenhaRetangulo(Renderizador* renderizador, SDL_Rect* rect, SDL_Color* c)
 {
     uint8_t r, g, b, a; //old color
-    SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);
-    SDL_SetRenderDrawColor(renderer, c->r, c->g, c->b, c->a);
-    SDL_RenderFillRect(renderer, rect);
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_GetRenderDrawColor(renderizador->sdlRenderer, &r, &g, &b, &a);
+    SDL_SetRenderDrawColor(renderizador->sdlRenderer, c->r, c->g, c->b, c->a);
+    SDL_RenderFillRect(renderizador->sdlRenderer, rect);
+    SDL_SetRenderDrawColor(renderizador->sdlRenderer, r, g, b, a);
     //SDL_FillRect(dst, r, (Uint32)((c->r << 16) + (c->g << 8) + (c->b << 0));
 }
 
-void Renderizador::desenhaTabuleiro()
+void desenhaTabuleiro(Renderizador* renderizador)
 {
+    int scale = renderizador->scale;
     SDL_Rect quadrado = { 0, 0, scale, scale };
     for (uint8_t j = 0; j < 8; j++) {
         for (uint8_t i = 0; i < 8; i++) {
             quadrado.x = scale * i;
             quadrado.y = scale * j;
             //alterna cores
-            renderizaRetangulo(&quadrado, ((i + j) % 2 == 0) ? &color1 : &color2);
+            desenhaRetangulo(renderizador, &quadrado, 
+                ((i + j) % 2 == 0) 
+                    ? &renderizador->color1 
+                    : &renderizador->color2
+            );
         }
     }
 }
