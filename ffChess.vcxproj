@@ -74,6 +74,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>X:\dev\SDL2\include;$(IncludePath)</IncludePath>
     <LibraryPath>X:\dev\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)out</OutDir>
+    <IntDir>$(ShortProjectName)\out\obj</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)out</OutDir>
+    <IntDir>$(ShortProjectName)\out\obj</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -133,14 +139,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Posicao.cpp" />
     <ClCompile Include="src\Entrada.cpp" />
-    <ClCompile Include="src\Partida.cpp" />
+    <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Renderizador.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Posicao.h" />
     <ClInclude Include="src\Entrada.h" />
-    <ClInclude Include="src\Partida.h" />
+    <ClInclude Include="src\GameState.h" />
     <ClInclude Include="src\Peca.h" />
     <ClInclude Include="src\Renderizador.h" />
   </ItemGroup>

@@ -1,18 +1,27 @@
 #pragma once
 
-enum Peca {
-    pPEAO = -6,
-    pCAVALO,
-    pBISPO,
-    pTORRE,
-    pDAMA,
-    pREI,
-    VAZIO = 0,
-    bREI,
-    bDAMA,
-    bTORRE,
-    bBISPO,
-    bCAVALO,
-    bPEAO,
-    INVALIDA = 10
+enum PieceColor {
+    WHITE,
+    BLACK
 };
+
+enum PieceShape {
+    KING = 1,
+    QUEEN,
+    ROOK,
+    BISHOP,
+    HORSEY,
+    PAWN,
+};
+
+class Piece
+{
+public:
+    Piece(PieceShape shape, PieceColor color);
+
+    const PieceShape shape;
+    const PieceColor color;
+private:
+};
+
+Piece::Piece(PieceShape shape, PieceColor color) : shape(shape), color(color) {}
